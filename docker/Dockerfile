@@ -11,6 +11,10 @@ RUN tar xzf dockerize.tar.gz
 RUN chmod +x dockerize
 
 
+# Download Otel Java Agent and cache that layer
+RUN wget -O otel.jar https://github.com/signalfx/splunk-otel-java/releases/latest/download/splunk-otel-javaagent.jar
+
+
 # wget is not installed on adoptopenjdk:11-jre-hotspot
 FROM adoptopenjdk:11-jre-hotspot
 
@@ -28,4 +32,4 @@ COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/spring-boot-loader/ ./
 COPY --from=builder application/snapshot-dependencies/ ./
 COPY --from=builder application/application/ ./
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT ["java", "-javaagent:/application/otel.jar", "org.springframework.boot.loader.JarLauncher"]
